@@ -9,7 +9,7 @@ services:
 
   pulsar:
     restart: always
-    image: apachepulsar/pulsar:2.10.1
+    image: apachepulsar/pulsar:3.0.0
     ports:
       - 6650:6650
       - 8080:8080
@@ -25,6 +25,9 @@ services:
       timeout: 5s
       retries: 15
       start_period: 2m
+    environment:
+      PULSAR_LOG_LEVEL: "INFO"
+      PULSAR_EXTRA_OPTS: "-Xms256M -Xmx512M"
 
   redis:
     restart: always
@@ -45,7 +48,7 @@ services:
 
   pulsar-manager:
     restart: always
-    image: apachepulsar/pulsar-manager:v0.2.0
+    image: alkersan/pulsar-manager:v0.4.0
     ports:
       - 9527:9527
       - 7750:7750
@@ -58,6 +61,7 @@ services:
       - ./monitoring/pulsar-manager/application.properties:/pulsar-manager/custom.properties
     environment:
       - SPRING_CONFIGURATION_FILE=/pulsar-manager/custom.properties
+      - PULSAR_MANAGER_OPTS=-Xmx256m
 
   prometheus:
     restart: always
@@ -214,7 +218,7 @@ services:
     environment:
       - HTTP_PORT=9005
       - PULSAR_URI=pulsar://pulsar:6650
-      - HONEYCOMB_API_KEY=${HONEYCOMB_API_KEY}
+      - HONEYCOMB_API_KEY=VKrAaArkCAcpE21LcLfecB
     depends_on:
       pulsar:
         condition: service_healthy
@@ -257,30 +261,30 @@ services:
 
   # Does not work yet because of issues with sbt-native-packager (it depends on a test dependency).
   # Comment out the feed service if you don't want random data generation running in Docker
-  #feed:
-    #restart: always
-    #image: trading-feed:latest
-    #ports:
-      #- "9001:9001"
-    #networks:
-      #- app
-    #environment:
-      #- HTTP_PORT=9001
-      #- PULSAR_URI=pulsar://pulsar:6650
-    #depends_on:
-      #pulsar:
-        #condition: service_healthy
-      #alerts:
-        #condition: service_healthy
-      #processor:
-        #condition: service_healthy
-      #snapshots:
-        #condition: service_healthy
-      #ws-server:
-        #condition: service_healthy
-    #healthcheck:
-      #test: ["CMD", "curl", "-f", "http://localhost:9001/health"]
-      #interval: 2s
-      #timeout: 5s
-      #retries: 15
-      #start_period: 2m
+  feed:
+    restart: always
+    image: trading-feed:latest
+    ports:
+      - "9001:9001"
+    networks:
+      - app
+    environment:
+      - HTTP_PORT=9001
+      - PULSAR_URI=pulsar://pulsar:6650
+    depends_on:
+      pulsar:
+        condition: service_healthy
+      alerts:
+        condition: service_healthy
+      processor:
+        condition: service_healthy
+      snapshots:
+        condition: service_healthy
+      ws-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9001/health"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+      start_period: 2m

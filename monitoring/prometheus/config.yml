@@ -35,4 +35,4 @@ scrape_configs:
   - job_name: 'ws-server'
     scrape_interval: 5s
     static_configs:
-         - targets: ['ws-server:9001']
+         - targets: ['ws-server:9000']

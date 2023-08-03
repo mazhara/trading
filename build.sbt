@@ -127,7 +127,6 @@ lazy val feed = (project in file("modules/feed"))
     libraryDependencies += Libraries.scalacheck
   )
   .dependsOn(core)
-  .dependsOn(domain.jvm % "compile->compile;compile->test")
 
 lazy val forecasts = (project in file("modules/forecasts"))
   .enablePlugins(DockerPlugin)
